@@ -8,6 +8,9 @@
 #  28 Jan 2019
 #
 
+VERSION=0.92
+
+
 function usage {
                echo "	$0 - reconfigure Wireguard for incoming connection "
 	       echo "	e.g. $0  "
@@ -19,7 +22,6 @@ function usage {
            }
 
 
-VERSION=0.91
 
 
 # initialize some vars
@@ -73,7 +75,7 @@ fi
 
 echo "---- Listening for incoming Wireguard packet"
 # capture src address and port
-addr_port=$(tcpdump -i $WAN -l -n -c 1 dst port $LISTEN_PORT | awk '{print $3 }')
+addr_port=$(tcpdump -i $WAN -l -n -c 1 -p dst port $LISTEN_PORT | awk '{print $3 }')
 
 # parse src address and port
 src_port=$(echo $addr_port | tr '.' ' ' | awk '{print $5 }')
