@@ -1,3 +1,11 @@
+### Synopsis
+
+Using WireGuard to bring the IPv6 Internet to the IPv4-only land of NAT.
+
+This script is a work-around for OpenWrt which reconfigures WireGuard peer on the fly based on incoming packets from a mobile OpenWrt Router.
+
+### Motivation
+
 The evil of NAT (Net Address Translation) has become institutionalized. And because NAT munges the network header, it causes all sorts of problems, including preventing simple IPv6 tunneling (6in4).
 
 But go to any Starbucks, McDonald's, the airport or even the Library, and you will find yourself on a NATted network. How to get on the IPv6 Internet when stuck behind NAT? Enter the VPN (Virtual Private Network).
