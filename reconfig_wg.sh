@@ -8,10 +8,10 @@
 #  28 Jan 2019
 #
 
-VERSION=0.92
+VERSION=0.93
 
 
-function usage {
+usage () {
                echo "	$0 - reconfigure Wireguard for incoming connection "
 	       echo "	e.g. $0  "
 	       echo "	-i [WG_interface]  optional, use if more than one Wireguard interface"
@@ -40,6 +40,7 @@ DEBUG=0
 # apps used
 TCPDUMP=/usr/sbin/tcpdump
 UCI=/sbin/uci
+LOGGER=/usr/bin/logger
 
 while getopts "?hi:" options; do
   case $options in
@@ -74,6 +75,10 @@ fi
 
 
 echo "---- Listening for incoming Wireguard packet"
+# write start time to syslog
+now=$(date)
+$LOGGER "Wireguard reconfig listening to port $LISTEN_PORT at $now"
+
 # capture src address and port
 addr_port=$(tcpdump -i $WAN -l -n -c 1 -p dst port $LISTEN_PORT | awk '{print $3 }')
 
@@ -115,6 +120,12 @@ sleep 2
 echo "---- show Wireguard status"
 
 wg show
+
+
+now=$(date)
+echo "---- Write time of connect to syslog: $now"
+
+$LOGGER -s "Wireguard reconfig complete: $now"
 
 echo " ---- pau"
 
