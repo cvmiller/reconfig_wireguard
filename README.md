@@ -41,9 +41,25 @@ The last point means you can bring IPv6 networking into the unfriendly IPv4 NATl
 
 What if your remote location is not static? What if the Evil NATland router changes your port? How can you fill in the Peer IP address and port if you have unpredictable NAT changing things on your?
 
-I am still working on it. The *real* solution would be to leave the Peer IP and Port info blank, and let WireGuard figure it out. But alas with OpenWrt 18.06.1 that doesn't work.
+I am still working on it. The *real* solution would be to leave the Peer IP and Port info blank, and let WireGuard figure it out. But alas with OpenWrt 18.06.2 (released 31 Jan 2019) that doesn't work.
 
-As a work-around, I have created a script (reconfig_wg.sh) for R2 which listens for the Peer, and reconfigures the R2 WireGuard IP and Port info dynamically. 
+As a work-around, I have created a script (`reconfig_wg.sh`) for R2 which listens for the Peer, and reconfigures the R2 WireGuard IP and Port info dynamically. 
+
+### Restarting the script
+
+The `reconfig_wg.sh` script is a **one-shot**. That is, once the remote wireguard router(R1) connects, the script terminates, and the remote router can *NOT* reconnect. To counter this problem, I have created a second script which will restart `reconfig_wg.sh`, and is designed to run in background on R2.
+
+#### Port knocking
+
+The second script `port_knock.sh` uses port knocking technique to detect when to restart `reconfig_wg.sh`. Port knocking is *knocking* on a port or ports, to open another non-related port.
+
+`port_knock.sh` is listening for a traceroute probe packet (UDP with TTL=1) on a user configurable port. Once the traceroute packet is received, `port_knock.sh` will restart `reconfig_wg` allowing the remote router to reconnect to the WireGuard VPN.
+
+#### Using Traceroute to knock on a port
+Traceroute can probe on specific ports using the `-p` option. To knock on port 19000, use the following:
+```
+traceroute -p 19000 my-wireguard-vpn.my-domain.com
+```
 
 ## Contributors
 
