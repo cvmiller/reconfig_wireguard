@@ -43,17 +43,40 @@ What if your remote location is not static? What if the Evil NATland router chan
 
 I am still working on it. The *real* solution would be to leave the Peer IP and Port info blank, and let WireGuard figure it out. But alas with OpenWrt 18.06.2 (released 31 Jan 2019) that doesn't work.
 
-As a work-around, I have created a script (`reconfig_wg.sh`) for R2 which listens for the Peer, and reconfigures the R2 WireGuard IP and Port info dynamically. 
+As a work-around, I have created a script (`reconfig_wg.sh`) for R2 which listens for the Peer, and reconfigures the R2 WireGuard IP and Port info dynamically. If there is only one WireGuard interface, the script will pull the info it needs from the router configuration.
+
+```
+# ./reconfig_wg.sh -h
+	./reconfig_wg.sh - reconfigure Wireguard for incoming connection 
+	e.g. ./reconfig_wg.sh  
+	-i [WG_interface]  optional, use if more than one Wireguard interface
+	-k  Kill the running version of this script
+	-h  this help
+```
 
 ### Restarting the script
 
 The `reconfig_wg.sh` script is a **one-shot**. That is, once the remote wireguard router(R1) connects, the script terminates, and the remote router can *NOT* reconnect. To counter this problem, I have created a second script which will restart `reconfig_wg.sh`, and is designed to run in background on R2.
+
+By default the `port_knock.sh` script will restart the `reconfig_wg_sh` script, but you can specify another command to run using the `-c [command]` option. The `-p` option tells the which port to listen to for the port knock.
 
 #### Port knocking
 
 The second script `port_knock.sh` uses port knocking technique to detect when to restart `reconfig_wg.sh`. Port knocking is *knocking* on a port or ports, to open another non-related port.
 
 `port_knock.sh` is listening for a traceroute probe packet (UDP with TTL=1) on a user configurable port. Once the traceroute packet is received, `port_knock.sh` will restart `reconfig_wg` allowing the remote router to reconnect to the WireGuard VPN.
+
+
+```
+# ./port_knock.sh -h
+	./port_knock.sh - restart reconfig_ws for incoming connections 
+	e.g. ./port_knock.sh  
+	-c [Wireguard listener command]
+	-p [knock port to listen on]
+	-k  Kill the running version of this script
+	-h  this help
+```
+
 
 #### Using Traceroute to knock on a port
 Traceroute can probe on specific ports using the `-p` option. To knock on port 19000, use the following:
