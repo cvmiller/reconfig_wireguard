@@ -8,13 +8,14 @@
 #  28 Jan 2019
 #
 
-VERSION=0.94
+VERSION=0.95
 
 
 usage () {
                echo "	$0 - reconfigure Wireguard for incoming connection "
 	       echo "	e.g. $0  "
 	       echo "	-i [WG_interface]  optional, use if more than one Wireguard interface"
+	       echo "	-p [peer number] optional, use if more than one peer"
 	       echo "	-k  Kill the running version of this script"
 	       echo "	-h  this help"
 	       echo "	"
@@ -29,14 +30,15 @@ usage () {
 
 WAN=$(/sbin/uci get network.wan.ifname)
 # wireguard interface, e.g. WGNET
-WG_INT=$(/sbin/uci show | grep proto | grep wireguard | cut -d '.' -f 2)
+WG_INT=$(/sbin/uci show 2> /dev/null | grep proto | grep wireguard | cut -d '.' -f 2)
 LISTEN_PORT=$(/sbin/uci get network.$WG_INT.listen_port)
 
 WG_CMD="/root/reconfig_wg.sh"
 
 # uci parameters to be reconfigured
-ENDPOINT_HOST="network.@wireguard_$WG_INT[0].endpoint_host"
-ENDPOINT_PORT="network.@wireguard_$WG_INT[0].endpoint_port"
+ENDPOINT_PEER=0
+ENDPOINT_HOST="network.@wireguard_$WG_INT[$ENDPOINT_PEER].endpoint_host"
+ENDPOINT_PORT="network.@wireguard_$WG_INT[$ENDPOINT_PEER].endpoint_port"
 
 DEBUG=0
 KILL=0
@@ -47,13 +49,15 @@ UCI=/sbin/uci
 LOGGER=/usr/bin/logger
 KILLALL=/usr/bin/killall
 
-while getopts "?hi:k" options; do
+while getopts "?hi:p:kd" options; do
   case $options in
     d ) DEBUG=1
     	numopts=$(( numopts++));;
     k ) KILL=1
     	numopts=$(( numopts++));;
     i ) WG_INT=$OPTARG
+    	numopts=$(( numopts + 2));;
+    p ) ENDPOINT_PEER=$OPTARG
     	numopts=$(( numopts + 2));;
     h ) usage;;
     \? ) usage	# show usage with flag and no value
@@ -156,6 +160,9 @@ echo "---- show Wireguard status"
 
 wg show
 
+echo "---- restarting dhhcpv6 server"
+
+/etc/init.d/odhcpd restart
 
 now=$(date)
 echo "---- Write time of connect to syslog: $now"
