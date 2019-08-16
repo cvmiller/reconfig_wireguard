@@ -8,14 +8,14 @@
 #  28 Jan 2019
 #
 
-VERSION=0.95
+VERSION=0.96
 
 
 usage () {
                echo "	$0 - reconfigure Wireguard for incoming connection "
 	       echo "	e.g. $0  "
 	       echo "	-i [WG_interface]  optional, use if more than one Wireguard interface"
-	       echo "	-p [peer number] optional, use if more than one peer"
+	       echo "	-P [peer number 0,1,2...] optional, use if more than one peer"
 	       echo "	-k  Kill the running version of this script"
 	       echo "	-h  this help"
 	       echo "	"
@@ -37,8 +37,6 @@ WG_CMD="/root/reconfig_wg.sh"
 
 # uci parameters to be reconfigured
 ENDPOINT_PEER=0
-ENDPOINT_HOST="network.@wireguard_$WG_INT[$ENDPOINT_PEER].endpoint_host"
-ENDPOINT_PORT="network.@wireguard_$WG_INT[$ENDPOINT_PEER].endpoint_port"
 
 DEBUG=0
 KILL=0
@@ -49,7 +47,7 @@ UCI=/sbin/uci
 LOGGER=/usr/bin/logger
 KILLALL=/usr/bin/killall
 
-while getopts "?hi:p:kd" options; do
+while getopts "?hi:P:kd" options; do
   case $options in
     d ) DEBUG=1
     	numopts=$(( numopts++));;
@@ -57,7 +55,7 @@ while getopts "?hi:p:kd" options; do
     	numopts=$(( numopts++));;
     i ) WG_INT=$OPTARG
     	numopts=$(( numopts + 2));;
-    p ) ENDPOINT_PEER=$OPTARG
+    P ) ENDPOINT_PEER=$OPTARG
     	numopts=$(( numopts + 2));;
     h ) usage;;
     \? ) usage	# show usage with flag and no value
@@ -69,6 +67,9 @@ done
 # remove the options as cli arguments
 shift $numopts
 
+# update endpoint vars based on peer number
+ENDPOINT_HOST="network.@wireguard_$WG_INT[$ENDPOINT_PEER].endpoint_host"
+ENDPOINT_PORT="network.@wireguard_$WG_INT[$ENDPOINT_PEER].endpoint_port"
 
 # check that tcpdump is installed
 check=$(command -v $TCPDUMP)

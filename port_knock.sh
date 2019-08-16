@@ -9,7 +9,7 @@
 #  9 Feb 2019
 #
 
-VERSION=0.94
+VERSION=0.95
 
 
 usage () {
@@ -42,8 +42,9 @@ KNOCK_PORT_END=$(expr $KNOCK_PORT + 99 )
 WG_CMD="/root/reconfig_wg.sh"
 
 # uci parameters to be reconfigured
-ENDPOINT_HOST="network.@wireguard_$WG_INT[0].endpoint_host"
-ENDPOINT_PORT="network.@wireguard_$WG_INT[0].endpoint_port"
+ENDPOINT_PEER=0
+ENDPOINT_HOST="network.@wireguard_$WG_INT[$ENDPOINT_PEER].endpoint_host"
+ENDPOINT_PORT="network.@wireguard_$WG_INT[$ENDPOINT_PEER].endpoint_port"
 
 DEBUG=0
 KILL=0
