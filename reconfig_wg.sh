@@ -8,7 +8,7 @@
 #  28 Jan 2019
 #
 
-VERSION=0.96
+VERSION=0.98
 
 
 usage () {
@@ -29,6 +29,10 @@ usage () {
 # initialize some vars
 
 WAN=$(/sbin/uci get network.wan.ifname)
+if [ "$WAN" == "" ]; then
+	# try device instead of ifname
+	WAN=$(/sbin/uci get network.wan.device)
+fi
 # wireguard interface, e.g. WGNET
 WG_INT=$(/sbin/uci show 2> /dev/null | grep proto | grep wireguard | cut -d '.' -f 2)
 LISTEN_PORT=$(/sbin/uci get network.$WG_INT.listen_port)
@@ -113,7 +117,7 @@ now=$(date)
 $LOGGER "Wireguard reconfig: listening to port $LISTEN_PORT at $now"
 
 # capture src address and port
-addr_port=$(tcpdump -i $WAN -l -n -c 1 -p "dst port $LISTEN_PORT and udp" | awk '{print $3 }')
+addr_port=$(tcpdump -i $WAN  -l -n -c 1 -p "dst port $LISTEN_PORT and udp" | awk '{print $3 }')
 
 
 # parse src address and port
