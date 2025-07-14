@@ -9,7 +9,7 @@
 #  9 Feb 2019
 #
 
-VERSION=0.99
+VERSION=0.99.1
 
 
 usage () {
@@ -141,7 +141,7 @@ do
 
 	# capture src address and port with ttl=1 (from traceroute)
 	#capture=$(tcpdump -i $WAN -l -n -c 1 -p -v "dst portrange $KNOCK_PORT-$KNOCK_PORT_END and udp and ip[8]=1" )
-	capture=$(tcpdump -i $WAN -l -n -c 1 -p -v "dst portrange $KNOCK_PORT-$KNOCK_PORT_END and udp and ip[8]=1" | egrep -o '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' )
+	capture=$(tcpdump -i $WAN -l -n -c 1 -p -v "dst portrange $KNOCK_PORT-$KNOCK_PORT_END and udp and ip[8]=1" | grep -E -o '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' )
 	# isolate ip src and dst 
 	capture=$(echo $capture |  awk '{print $1 " -> " $2 }')
 	if [ $DEBUG -eq 1 ]; then
