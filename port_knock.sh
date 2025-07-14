@@ -9,7 +9,7 @@
 #  9 Feb 2019
 #
 
-VERSION=0.98
+VERSION=0.99
 
 
 usage () {
@@ -103,7 +103,7 @@ fi
 
 
 kill_script () {
-	if [ $1 != "" ]; then
+	if [ "$1" != "" ]; then
 		# kill _this_ script
 		cmd=$1
 	else
